@@ -1,9 +1,8 @@
-import os
 import shutil
 from pathlib import Path
 
 
-def organize_files(source_dir, image_dir='image', label_dir='label'):
+def organize_files(source_dir, image_dir="image", label_dir="label"):
     source_path = Path(source_dir)
 
     # 创建目标文件夹
@@ -13,8 +12,8 @@ def organize_files(source_dir, image_dir='image', label_dir='label'):
     lbl_path.mkdir(exist_ok=True)
 
     # 支持的图片格式
-    image_exts = {'.png', '.jpg', '.jpeg', '.bmp', '.gif', '.tiff', '.webp'}
-    label_exts = {'.txt'}
+    image_exts = {".png", ".jpg", ".jpeg", ".bmp", ".gif", ".tiff", ".webp"}
+    label_exts = {".txt"}
 
     moved_images = 0
     moved_labels = 0
@@ -41,7 +40,6 @@ def organize_files(source_dir, image_dir='image', label_dir='label'):
 
 # 使用示例
 if __name__ == "__main__":
-
     source_folder = r"###/data/newShuJu"
 
     organize_files(source_folder)
