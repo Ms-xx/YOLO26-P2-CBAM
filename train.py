@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 
 # 解决 MKL 冲突（保留）
 os.environ["MKL_THREADING_LAYER"] = "GNU"
@@ -9,9 +9,10 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, current_dir)
 
 # 现在会优先导入当前目录下的 ultralytics（如果存在）
-from ultralytics import YOLO
-import ultralytics
 import torch
+
+import ultralytics
+from ultralytics import YOLO
 
 print(f"ultralytics 路径: {ultralytics.__file__}")
 print(f"ultralytics 版本: {ultralytics.__version__}")
@@ -44,8 +45,8 @@ model.train(
     epochs=150,
     lr0=0.001,
     lrf=0.01,
-    name='stage1_freeze1',
-    device='cuda:0,1,2,3',  # 因为 CUDA_VISIBLE_DEVICES='3'，所以这里 'cuda:0' 实际是 GPU 3
+    name="stage1_freeze1",
+    device="cuda:0,1,2,3",  # 因为 CUDA_VISIBLE_DEVICES='3'，所以这里 'cuda:0' 实际是 GPU 3
     batch=32,
     imgsz=512,
     workers=8,
@@ -64,8 +65,8 @@ model.train(
     epochs=200,
     lr0=0.0001,
     lrf=0.01,
-    name='stage1_finetune1',
-    device='cuda:0,1,2,3',  # 同样使用 GPU 3
+    name="stage1_finetune1",
+    device="cuda:0,1,2,3",  # 同样使用 GPU 3
     batch=32,
     imgsz=512,
     workers=8,
