@@ -1,14 +1,14 @@
-import os
-import cv2
-import numpy as np
 from pathlib import Path
 
+import cv2
+import numpy as np
 
-def visualize_yolo_labels(image_dir, label_dir, output_dir='visualized', class_names=None):
+
+def visualize_yolo_labels(image_dir, label_dir, output_dir="visualized", class_names=None):
     image_path = Path(image_dir)
     label_path = Path(label_dir)
     output_path = Path(output_dir)  # 缺少这行！
-    
+
     # 删除重复的mkdir，只保留一行
     output_path.mkdir(parents=True, exist_ok=True)
 
@@ -17,7 +17,7 @@ def visualize_yolo_labels(image_dir, label_dir, output_dir='visualized', class_n
     colors = np.random.randint(0, 255, size=(80, 3), dtype=np.uint8).tolist()
 
     # 支持的图片格式
-    image_exts = {'.jpg', '.jpeg', '.png', '.bmp', '.webp'}
+    image_exts = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 
     for img_file in image_path.iterdir():
         if img_file.suffix.lower() not in image_exts:
@@ -40,7 +40,7 @@ def visualize_yolo_labels(image_dir, label_dir, output_dir='visualized', class_n
             continue
 
         # 读取并绘制标注
-        with open(label_file, 'r') as f:
+        with open(label_file) as f:
             for line in f:
                 parts = line.strip().split()
                 if len(parts) != 5:
@@ -86,8 +86,13 @@ if __name__ == "__main__":
     LABEL_DIR = "###/data/task_all/label"
     OUTPUT_DIR = "###/data/task_all/visualized"
 
-    CLASS_NAMES = ['Unclassified foreign objects', 'Rockfall gauge infringement', 
-                   'Personnel Intrusion', 'Animal Intrusion', 'Train Passing', 
-                   'Background-Only Scene']
+    CLASS_NAMES = [
+        "Unclassified foreign objects",
+        "Rockfall gauge infringement",
+        "Personnel Intrusion",
+        "Animal Intrusion",
+        "Train Passing",
+        "Background-Only Scene",
+    ]
 
     visualize_yolo_labels(IMAGE_DIR, LABEL_DIR, OUTPUT_DIR, CLASS_NAMES)
