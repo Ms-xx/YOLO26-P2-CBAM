@@ -512,26 +512,35 @@ class RepConv(nn.Module):
 class ChannelAttention(nn.Module):
     """Channel-attention module for feature recalibration.
 
-    Applies attention weights to channels based on global average pooling.
+    Applies channel attention using both average-pooled and max-pooled spatial
+    descriptors processed by a shared multi-layer perceptron (MLP), following the
+    CBAM formulation: Mc(F) = sigmoid(MLP(AvgPool(F)) + MLP(MaxPool(F))).
 
     Attributes:
-        pool (nn.AdaptiveAvgPool2d): Global average pooling.
-        fc (nn.Conv2d): Fully connected layer implemented as 1x1 convolution.
+        avg_pool (nn.AdaptiveAvgPool2d): Global average pooling.
+        max_pool (nn.AdaptiveMaxPool2d): Global max pooling.
+        fc1 (nn.Conv2d): MLP first 1x1 convolution (channel reduction).
+        relu (nn.ReLU): ReLU activation between MLP layers.
+        fc2 (nn.Conv2d): MLP second 1x1 convolution (channel restoration).
         act (nn.Sigmoid): Sigmoid activation for attention weights.
 
     References:
-        https://github.com/open-mmlab/mmdetection/tree/v3.0.0rc1/configs/rtmdet
+        https://arxiv.org/abs/1807.06521 (CBAM: Convolutional Block Attention Module)
     """
 
-    def __init__(self, channels: int) -> None:
+    def __init__(self, channels: int, reduction: int = 16) -> None:
         """Initialize Channel-attention module.
 
         Args:
             channels (int): Number of input channels.
+            reduction (int): Channel reduction ratio of the shared MLP.
         """
         super().__init__()
-        self.pool = nn.AdaptiveAvgPool2d(1)
-        self.fc = nn.Conv2d(channels, channels, 1, 1, 0, bias=True)
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        self.max_pool = nn.AdaptiveMaxPool2d(1)
+        self.fc1 = nn.Conv2d(channels, channels // reduction, 1, bias=False)
+        self.relu = nn.ReLU(inplace=True)
+        self.fc2 = nn.Conv2d(channels // reduction, channels, 1, bias=False)
         self.act = nn.Sigmoid()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -543,7 +552,9 @@ class ChannelAttention(nn.Module):
         Returns:
             (torch.Tensor): Channel-attended output tensor.
         """
-        return x * self.act(self.fc(self.pool(x)))
+        avg_out = self.fc2(self.relu(self.fc1(self.avg_pool(x))))
+        max_out = self.fc2(self.relu(self.fc1(self.max_pool(x))))
+        return x * self.act(avg_out + max_out)
 
 
 class SpatialAttention(nn.Module):

@@ -144,6 +144,12 @@ def bbox_iou(
             return iou - rho2 / c2  # DIoU
         c_area = cw * ch + eps  # convex area
         return iou - (c_area - union) / c_area  # GIoU https://arxiv.org/pdf/1902.09630.pdf
+    if WIoU:
+        cw = b1_x2.maximum(b2_x2) - b1_x1.minimum(b2_x1)  # convex (smallest enclosing box) width
+        ch = b1_y2.maximum(b2_y2) - b1_y1.minimum(b2_y1)  # convex height
+        rho2 = ((b2_x1 + b2_x2 - b1_x1 - b1_x2).pow(2) + (b2_y1 + b2_y2 - b1_y1 - b1_y2).pow(2)) / 4  # center dist**2
+        r = torch.exp(rho2 / (cw.pow(2) + ch.pow(2) + eps))  # Wise-IoU focusing factor
+        return 1.0 - r * (1.0 - iou)  # Wise-IoU; (1 - result) equals the WIoU loss
     return iou  # IoU
 
 
